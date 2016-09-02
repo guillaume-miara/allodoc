@@ -201,7 +201,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': env('DJANGO_LOG_LEVEL', default='ERROR'),
+            'level': env('DJANGO_LOG_LEVEL', default='DEBUG'),
         },
     },
 }
