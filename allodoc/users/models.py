@@ -11,12 +11,27 @@ from django.utils.translation import ugettext_lazy as _
 @python_2_unicode_compatible
 class User(AbstractUser):
 
-    # First Name and Last Name do not cover name patterns
-    # around the globe.
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
+
+    #This extends AbstractUser so it already has first name and last name
+
+    #To simplify, our users will only be doctors or patients
+    #TODO: use an enum instead of hard coding
+    ROLE_CHOICES = (
+        ('doctor', 'Doctor'),
+        ('patient', 'Patient')
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='patient')
 
     def __str__(self):
         return self.username
 
     def get_absolute_url(self):
         return reverse('users:detail', kwargs={'username': self.username})
+
+    def is_doctor(self):
+        return self.role == 'doctor'
+
+    def is_patient(self):
+        return self.role == 'patient'
+

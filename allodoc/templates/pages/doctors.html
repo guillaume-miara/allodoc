@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h2>Here are all the allodoc's doctors listed</h2>
+
+    <div class="list-group">
+
+          <table class="table">
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Username</th>
+                  <th>Action</th>
+                  <th>Request Status</th>
+                  <th>Meeting Room</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in user_list %}
+                <tr>
+                  <td>{{ user.first_name  }}</td>
+                  <td>{{ user.last_name}}</td>
+                  <td>{{ user.username}}</td>
+                  <td><button class="btn btn-primary" onclick="printToConsole('{{ user.username }}')">Request A Call</button></td>
+                  <td>Pending</td>
+                  <td>NA</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+    </div>
+{% endblock content %}
+

@@ -13,6 +13,13 @@ urlpatterns = [
         name='list'
     ),
 
+    # URL pattern for the DoctorListView
+    url(
+        regex=r'^doctors/$',
+        view=views.DoctorListView.as_view(),
+        name='list'
+    ),
+
     # URL pattern for the UserRedirectView
     url(
         regex=r'^~redirect/$',
