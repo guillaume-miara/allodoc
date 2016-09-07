@@ -3,6 +3,24 @@
 {% block content %}
     <h2>Here is a list of my consultations</h2>
 
-
-
 {% endblock content %}
+
+{%  block page_javascript %}
+
+      <!-- Storing the current user in a variable to request the token -->
+
+      <script>
+        {% if request.user %}
+            currentUserUid = '{{request.user.username}}';
+            currentUserDisplayName = '{{request.user.first_name}}' + '{{request.user.last_name}}' ;
+        {% else %}
+            currentUserUid = null;
+            currentUserDisplayName = null;
+        {% endif %}
+      </script>
+
+      <!-- Project Javascript -->
+
+      <script src="{% static 'js/project.js' %}"></script>
+
+  {% endblock page_javascript %}

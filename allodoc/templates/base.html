@@ -105,23 +105,13 @@
       <!-- Your stuff: Third-party javascript libraries go here -->
       <script type="text/javascript" src="https://download.rtccloud.net/js/webappid/cwvojvsd6sge"></script>
 
-      <!-- Storing the current user in a variable to request the token -->
-
-      <script>
-        {% if request.user %}
-            currentUserUid = '{{request.user.username}}';
-            currentUserDisplayName = '{{request.user.first_name}}' + '{{request.user.last_name}}' ;
-        {% else %}
-            currentUserUid = null;
-            currentUserDisplayName = null;
-        {% endif %}
-      </script>
-
-      <!-- Project Javascript -->
-
-      <script src="{% static 'js/project.js' %}"></script>
-
     {% endblock javascript %}
+
+  {%  block page_javascript %}
+
+
+  {% endblock page_javascript %}
+
   </body>
 </html>
 
