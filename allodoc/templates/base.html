@@ -103,11 +103,23 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js" integrity="sha384-ux8v3A6CPtOTqOzMKiuo3d/DomGaaClxFYdCu2HPMBEkf6x2xiDyJ7gkXU0MWwaD" crossorigin="anonymous"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
+      <script type="text/javascript" src="https://download.rtccloud.net/js/webappid/cwvojvsd6sge"></script>
 
-      <!-- place project specific Javascript in this file -->
+      <!-- Storing the current user in a variable to request the token -->
+
+      <script>
+        {% if request.user %}
+            currentUserUid = '{{request.user.username}}';
+            currentUserDisplayName = '{{request.user.first_name}}' + '{{request.user.last_name}}' ;
+        {% else %}
+            currentUserUid = null;
+            currentUserDisplayName = null;
+        {% endif %}
+      </script>
+
+      <!-- Project Javascript -->
 
       <script src="{% static 'js/project.js' %}"></script>
-
 
     {% endblock javascript %}
   </body>

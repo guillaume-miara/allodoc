@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import json
+
+import requests
 from django.contrib.auth.models import AbstractUser
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -23,6 +26,8 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='patient')
 
+    video_security_token = models.CharField(_('SightCall security token'), blank=True,default=' ', max_length=255)
+
     def __str__(self):
         return self.username
 
@@ -34,4 +39,35 @@ class User(AbstractUser):
 
     def is_patient(self):
         return self.role == 'patient'
+
+    #Will asynchronously request a token from rtcc cloud
+    def request_video_security_token(self):
+
+        SightCallApiKey = 'cbd853379dea6a4225acd2671b8355409d4efe553e6db04d4eda0999642c'
+
+        headers = {
+                    'Authorization': 'Apikey ' + SightCallApiKey,
+        }
+
+        data = {
+                'uid': self.username,
+                'domain': '',
+                'profile': '',
+        }
+
+        url = 'https://api.rtccloud.net/v2.0/provider/usertoken'
+
+        try:
+            response = requests.post(url,data=data,headers=headers)
+            payload = response.json()
+            response.raise_for_status()
+            self.video_security_token = payload['data']
+        except requests.exceptions.Timeout:
+            print "Request has timed out!"
+        except requests.exceptions.HTTPError as e:
+            print e
+        except requests.exceptions.RequestException as e:
+            print e
+
+        return self.video_security_token
 

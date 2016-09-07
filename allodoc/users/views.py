@@ -26,7 +26,7 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
 
-    fields = ['name','role' ]
+    fields = ['first_name','last_name','role' ]
 
     # we already imported User in the view code above, remember?
     model = User
@@ -47,29 +47,4 @@ class UserListView(LoginRequiredMixin, ListView):
     slug_field = 'username'
     slug_url_kwarg = 'username'
 
-    def get_queryset(self):
-        qs = super(UserListView, self).get_queryset()
-        return qs.filter(role='patient')
 
-
-class DoctorListView(LoginRequiredMixin, ListView):
-    model = User
-    # These next two lines tell the view to index lookups by username
-    slug_field = 'username'
-    slug_url_kwarg = 'username'
-
-    template_name = 'pages/doctors.html'
-    queryset = User.objects.filter(role='doctor')
-
-
-class PatientListView(LoginRequiredMixin, ListView):
-    model = User
-    # These next two lines tell the view to index lookups by username
-    slug_field = 'username'
-    slug_url_kwarg = 'username'
-
-    template_name = 'pages/doctors.html'
-
-    def get_queryset(self):
-        qs = super(UserListView, self).get_queryset()
-        return qs.filter(role='patient')

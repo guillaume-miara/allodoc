@@ -8,11 +8,11 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from django.views import defaults as default_views
 
+from allodoc import views
+
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='pages/home.html'), name='home'),
     url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
-    url(r'^doctors/$', TemplateView.as_view(template_name='pages/doctors.html'), name='doctors'),
-    url(r'^consultations/$', TemplateView.as_view(template_name='pages/consultations.html'), name='consultations'),
 
     # Django Admin, use {% url 'admin:index' %}
     url(settings.ADMIN_URL, include(admin.site.urls)),
@@ -21,7 +21,11 @@ urlpatterns = [
     url(r'^users/', include('allodoc.users.urls', namespace='users')),
     url(r'^accounts/', include('allauth.urls')),
 
-    # Your stuff: custom urls includes go here
+    #Security token ajax request from doctors page
+    url(r'^doctors/ajax/authentification/(?P<uid>[-\w]+)', views.get_security_token, name='get_security_token'),
+
+    url(r'^doctors/$', views.doctors, name='doctors'),
+    url(r'^consultations/$', TemplateView.as_view(template_name='pages/consultations.html'), name='consultations'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
