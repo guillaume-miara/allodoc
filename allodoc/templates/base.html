@@ -43,19 +43,27 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'home' %}">Home</a>
               </li>
-              {% if request.user.is_doctor %}
-              <li class="nav-item">
+
+              {%  if request.user %}
+
+                {% if request.user.is_doctor %}
+                <li class="nav-item">
                 <a class="nav-link" href="{% url 'consultations' %}">My Consultations</a>
-              </li>
-              {% elif request.user.is_patient %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'doctors' %}">Call A Doctor</a>
-              </li>
+                </li>
+                {% elif request.user.is_patient %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'doctors' %}">Call A Doctor</a>
+                </li>
+                {% endif %}
+
               {% else %}
+
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'about' %}">Instructions</a>
               </li>
+
               {% endif %}
+
             </ul>
 
             <ul class="nav navbar-nav pull-xs-right">
