@@ -133,36 +133,60 @@ initialize(currentUserUid, currentUserDisplayName);
 // CALLS////
 /////////////
 
-// callbacks
 
-function recordCall(call){
-    // TODO: Record this call  on the server
-    console.log("Succesfully recorded a new call");
-}
+/**
+ * Call
+ *
+ * In this part, we manage the creation and the reception of a  call. We use the rtcc.createCall function,
+ * and we define the callbacks for changing the UI on various call events.
+ *
+ * Detailed tutorial available here:
+ * https://docs.sightcall.com/GD/01_javascript/Tutorials/02_js_call.html
+ */
 
-function receiveCall(call){
-    console.log("New call has been received");
-}
 
-//Used to record analytics when sending a call and to setup what happens when receiving a call
-function callListener(call) {
+//when we are connected to the presence service, we show the chat
+rtcc.on('cloud.sip.ok', function() {
+  $('#once_connected').show();
+  $('#call').html('Ready for incoming/outgoing call');
+})
 
-    if (call.getDirection() === 'in') {
-        recordCall(call)
-    } else if (call.getDirection() === 'out'){
-        receiveCall(call)
-    }else{
-        console.log("There was an error with this call object" + call);
+// Define the callbacks each time we have a new call
+function defineCallListeners(call) {
+  if (call.getDirection() === "incoming") {
+      $('#call').html('Receiving call from ' + call.dn);
+  }
+  call.onAll(function() {
+    if (window.console) {
+      console.log('Call: event "' + this.eventName + '"" with arguments: ' + JSON.stringify(arguments));
     }
+  })
+  call.on('active', function() {
+    $('#call').html('Call active');
+  });
+
+  // for webrtc screen share
+  call.on('chrome.screenshare.missing', function(url) {
+    window.open(url);
+  });
+
+  call.on('terminate', function(reason) {
+    if (reason === 'not allowed') {
+      $('#call').html('Only allowed to call the parent, Mike in our case');
+    } else {
+      $('#call').html('Ready for incoming/outgoing call');
+    }
+  })
 }
 
-//Event handlers
-
-rtcc.on('call.create', callListener);
+//when a call has started
+rtcc.on('call.create', defineCallListeners)
 
 //UI Bindings
 makeCall = function(uid, displayName){
-    rtcc.createCall(uid, "internal", displayName);
+
+    $('#call').html('Calling ' + displayName);
+    rtcc.createCall(uid, 'internal', displayName);
 }
 
 //

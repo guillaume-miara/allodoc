@@ -4,6 +4,13 @@
 
     <h2>Here are all the allodoc's doctors listed</h2>
 
+    <div id="once_connected" style="display:none;">
+        <p> Connected to SightCall</p>
+    </div>
+
+    <div id="call" ">
+    </div>
+
     <div class="list-group">
 
           <table class="table">
@@ -30,25 +37,8 @@
             </table>
 
     </div>
+
 {% endblock content %}
 
-{%  block page_javascript %}
 
-      <!-- Storing the current user in a variable to request the token -->
-
-      <script>
-        {% if request.user %}
-            currentUserUid = '{{request.user.username}}';
-            currentUserDisplayName = '{{request.user.first_name}}' + '{{request.user.last_name}}' ;
-        {% else %}
-            currentUserUid = null;
-            currentUserDisplayName = null;
-        {% endif %}
-      </script>
-
-      <!-- Project Javascript -->
-
-      <script src="{% static 'js/project.js' %}"></script>
-
-{% endblock page_javascript %}
 

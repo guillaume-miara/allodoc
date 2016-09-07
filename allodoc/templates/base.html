@@ -118,10 +118,21 @@
 
     {% endblock javascript %}
 
-  {%  block page_javascript %}
+    <!-- Javascript specific to a page goes here -->
+    {% block page_javascript %}
+        <script>
+        {% if request.user %}
+            currentUserUid = '{{request.user.username}}';
+            currentUserDisplayName = '{{request.user.first_name}}' + '{{request.user.last_name}}' ;
+        {% else %}
+            currentUserUid = null;
+            currentUserDisplayName = null;
+        {% endif %}
+      </script>
+    {% endblock page_javascript %}
 
-
-  {% endblock page_javascript %}
+    <!-- Project Javascript -->
+    <script src="{% static 'js/project.js' %}"></script>
 
   </body>
 </html>
