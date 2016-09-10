@@ -24,7 +24,61 @@ $('.form-group').removeClass('row');
 //////////////////////////////////////////////ALLODOC CONTROLLER SCRIPT////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////
+// UI HELPERS/////////////////////////////
+//////////////////////////////////////////
 
+var toggleConnectionStatus = function(status){
+  switch(status){
+    case 'connecting':
+      $('#connection_connecting').show();
+      $('#connection_on').hide();
+      $('#connection_off').hide();
+      break;
+    case 'on':
+      $('#connection_connecting').hide();
+      $('#connection_on').show();
+      $('#connection_off').hide();
+      break;
+    case 'off':
+      $('#connection_connecting').hide();
+      $('#connection_on').hide();
+      $('#connection_off').show();
+      break;
+
+  }
+}
+
+var toggleCallStatus = function(status){
+  switch(status){
+    case 'receive':
+      $('#call_receive').show();
+      $('#call_on').hide();
+      $('#call_not_ready').hide();
+      $('#call_ready').hide();
+      break;
+    case 'on':
+      $('#call_receive').hide();
+      $('#call_on').show();
+      $('#call_not_ready').hide();
+      $('#call_ready').hide();
+      break;
+    case 'ready':
+      $('#call_receive').hide();
+      $('#call_on').hide();
+      $('#call_not_ready').hide();
+      $('#call_ready').show();
+      break;
+    case 'not_ready':
+      $('#call_receive').hide();
+      $('#call_on').hide();
+      $('#call_not_ready').show();
+      $('#call_ready').hide();
+      break;
+
+  }
+
+}
 
 //////////////////////////////////////////
 // INITIALIZATION OF THE SIGHTCALL SDK////
@@ -67,10 +121,10 @@ var bindAuthCallbacks = function(rtcc, user_id) {
 
   //what to do when we are ready to make calls
 
-
   rtcc.on('cloud.sip.ok', function() {
-    $('#connecting').css('display', 'none');
-    $('#stat').text('You are now connected in mode: ' + rtcc.getConnectionMode());
+    console.log("cloud sip ok");
+    toggleConnectionStatus('on');
+    toggleCallStatus('ready');
     rtcc.setDisplayName(storedDisplayName)
   })
 
@@ -93,10 +147,6 @@ var bindAuthCallbacks = function(rtcc, user_id) {
   });
 };
 
-function showError(error) {
-  $('#error-content').text(error)
-  $('#error').show()
-}
 
 //this will get an authentification token from your backend
 function getToken(uid, callback) {
@@ -106,22 +156,23 @@ function getToken(uid, callback) {
     .done(function(response) {
       var token = response.token;
       if (!token) {
-        showError('error getting the token:' + JSON.stringify(response))
+        console.log("Error : no token")
       } else {
         console.log(token);
         callback(token);
       }
     })
-    .fail(showError)
+    .fail(console.log("getToken failing"))
 }
 
 //start by getting a token, then initialize the rtcc object.
 function initialize(userId, displayName) {
   bindAuthCallbacks(rtcc, userId);
-  storedDisplayName = displayName
+  storedDisplayName = displayName;
   getToken(userId, function(token) {
     rtcc.setToken(token);
     rtcc.initialize();
+    console.log(rtcc);
   });
 }
 
@@ -145,24 +196,23 @@ initialize(currentUserUid, currentUserDisplayName);
  */
 
 
-//when we are connected to the presence service, we show the chat
-rtcc.on('cloud.sip.ok', function() {
-  $('#once_connected').show();
-  $('#call').html('Ready for incoming/outgoing call');
-})
-
 // Define the callbacks each time we have a new call
 function defineCallListeners(call) {
+
   if (call.getDirection() === "incoming") {
-      $('#call').html('Receiving call from ' + call.dn);
+      toggleCallStatus('receive');
+      $('#callReceiveModal').modal('show');
+      $('#caller_id').html(call.dn);
   }
+
   call.onAll(function() {
     if (window.console) {
       console.log('Call: event "' + this.eventName + '"" with arguments: ' + JSON.stringify(arguments));
     }
   })
+
   call.on('active', function() {
-    $('#call').html('Call active');
+    toggleCallStatus('on');
   });
 
   // for webrtc screen share
@@ -172,9 +222,10 @@ function defineCallListeners(call) {
 
   call.on('terminate', function(reason) {
     if (reason === 'not allowed') {
-      $('#call').html('Only allowed to call the parent, Mike in our case');
+      console.log("Call was not allowed");
+      toggleCallStatus('ready');
     } else {
-      $('#call').html('Ready for incoming/outgoing call');
+      toggleCallStatus('ready');
     }
   })
 }
@@ -184,8 +235,6 @@ rtcc.on('call.create', defineCallListeners)
 
 //UI Bindings
 makeCall = function(uid, displayName){
-
-    $('#call').html('Calling ' + displayName);
     rtcc.createCall(uid, 'internal', displayName);
 }
 

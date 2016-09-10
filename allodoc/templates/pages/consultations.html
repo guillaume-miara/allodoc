@@ -1,11 +1,24 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% block content %}
-    <h2>Here is a list of my consultations</h2>
+    <div class="col-md-3">
+
+            <h2>{{ currentUserDisplayName }}</h2>
+            <div id="once_connected" style="display:none;">
+                <p> Connected to SightCall</p>
+            </div>
+            <div id="call">
+            </div>
+    </div>
+
+    <div class="col-md-9">
+        <h2>Here is a list of my consultations</h2>
+    </div>
 
 {% endblock content %}
 
-{%  block page_javascript %}
+{{%  block page_javascript %}
 
       <!-- Storing the current user in a variable to request the token -->
 
@@ -19,8 +32,7 @@
         {% endif %}
       </script>
 
-      <!-- Project Javascript -->
+      <script src='{% static 'js/project.js' %}'></script>
 
-      <script src="{% static 'js/project.js' %}"></script>
+{% endblock page_javascript %}
 
-  {% endblock page_javascript %}

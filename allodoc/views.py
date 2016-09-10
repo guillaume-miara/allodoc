@@ -21,6 +21,7 @@ def doctors(request):
 
 def get_security_token(request,uid):
 
+    print uid
     if request.is_ajax():
         response_data = {}
         try:
@@ -30,6 +31,7 @@ def get_security_token(request,uid):
             response_data['token'] = user.video_security_token
             response_data['message'] = 'We found the user token'
         except Exception as e :
+            print "User not found"
             response_data['message'] = e.message
 
         return JsonResponse(response_data)
