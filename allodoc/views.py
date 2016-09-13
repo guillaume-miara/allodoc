@@ -19,6 +19,14 @@ def doctors(request):
     return render(request, 'pages/doctors.html', context)
 
 
+def record_call_event(request):
+
+    if request.is_ajax():
+        print request
+
+    else:
+        raise Http404
+
 def get_security_token(request,uid):
 
     print uid

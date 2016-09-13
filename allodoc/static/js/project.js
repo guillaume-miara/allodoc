@@ -202,13 +202,28 @@ function recordCallEvent(call, type){
   // Call created: Patient calls
   // Call started: Doctor accept calls
   // Call terminated: Call is finished
+  data = {}
+  data['callId'] = call.callId;
+
+  switch(type){
+    case('created'):
+      data['created']= Date.now();
+      data['type']='created';
+      break;
+    case('started'):
+      data['started']= Date.now();
+      data['type']='started';
+      break;
+    case('terminated'):
+      data['terminated']= Date.now();
+      data['type']='terminated';
+      break;
+  }
 
    $.ajax({
                  type:"POST",
                  url: CALL_URL,
-                 data: {
-                        'video': $('#test').val() // from form
-                        },
+                 data: data,
                  success: function(){
                      console.log("success")
                  }
@@ -218,6 +233,8 @@ function recordCallEvent(call, type){
 
 // Define the callbacks each time we have a new call
 function defineCallListeners(call) {
+
+  recordCallEvent(call,'created');
 
   if (call.getDirection() === "incoming") {
       toggleCallStatus('receive');
@@ -232,9 +249,6 @@ function defineCallListeners(call) {
   })
 
   call.on('active', function() {
-    console.log("call has started");
-    console.log("Event start info:" + this);
-    //recordCallEvent(call,'created')
     toggleCallStatus('on');
   });
 
@@ -245,9 +259,7 @@ function defineCallListeners(call) {
 
   call.on('terminate', function(reason) {
 
-    console.log("call has terminated");
-    console.log("Event terminated info:" + this);
-    //recordCallEvent(call,'terminated')
+    recordCallEvent(call,'terminated');
     if (reason === 'not allowed') {
       console.log("Call was not allowed");
       toggleCallStatus('ready');
@@ -256,11 +268,6 @@ function defineCallListeners(call) {
     }
   })
 
-  call.on('conference.participants', function(){
-    console.log("call has participants");
-    console.log("Event participants info:" + this);
-    //recordCallEvent(call,'started')
-  })
 }
 
 //when a call has started
