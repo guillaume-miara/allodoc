@@ -22,10 +22,7 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
 
     #Security token ajax request from doctors page
-    url(r'/ajax/authentification/(?P<uid>.*)', views.get_security_token, name='get_security_token'),
-
-    #Call events recordings
-    url(r'/ajax/call/', views.record_call_event, name='record_call_event'),
+    url(r'ajax/authentification/(?P<uid>.*)', views.get_security_token, name='get_security_token'),
 
     url(r'^doctors/$', views.doctors, name='doctors'),
     url(r'^consultations/$', TemplateView.as_view(template_name='pages/consultations.html'), name='consultations'),

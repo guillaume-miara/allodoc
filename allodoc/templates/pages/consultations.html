@@ -71,6 +71,7 @@
             currentUserUid = null;
             currentUserDisplayName = null;
         {% endif %}
+        CRSF_TOKEN = '{{csrf_token }}';
       </script>
 
       <script src='{% static 'js/project.js' %}'></script>

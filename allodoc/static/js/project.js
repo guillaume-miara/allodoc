@@ -196,50 +196,13 @@ initialize(currentUserUid, currentUserDisplayName);
  * https://docs.sightcall.com/GD/01_javascript/Tutorials/02_js_call.html
  */
 
-function recordCallEvent(call, type){
-
-  // Recording 3 types of events
-  // Call created: Patient calls
-  // Call started: Doctor accept calls
-  // Call terminated: Call is finished
-  data = {}
-  data['callId'] = call.callId;
-
-  switch(type){
-    case('created'):
-      data['created']= Date.now();
-      data['type']='created';
-      break;
-    case('started'):
-      data['started']= Date.now();
-      data['type']='started';
-      break;
-    case('terminated'):
-      data['terminated']= Date.now();
-      data['type']='terminated';
-      break;
-  }
-
-   $.ajax({
-                 type:"POST",
-                 url: CALL_URL,
-                 data: data,
-                 success: function(){
-                     console.log("success")
-                 }
-            });
-}
-
 
 // Define the callbacks each time we have a new call
 function defineCallListeners(call) {
 
-  recordCallEvent(call,'created');
-
   if (call.getDirection() === "incoming") {
       toggleCallStatus('receive');
       //$('#callReceiveModal').modal('show');
-      $('#caller_id').html(call.dn);
   }
 
   call.onAll(function() {
@@ -259,7 +222,6 @@ function defineCallListeners(call) {
 
   call.on('terminate', function(reason) {
 
-    recordCallEvent(call,'terminated');
     if (reason === 'not allowed') {
       console.log("Call was not allowed");
       toggleCallStatus('ready');
@@ -271,7 +233,7 @@ function defineCallListeners(call) {
 }
 
 //when a call has started
-rtcc.on('call.create', defineCallListeners)
+rtcc.on('call.create', defineCallListeners);
 
 
 //UI Bindings
@@ -279,5 +241,4 @@ makeCall = function(uid, displayName){
     rtcc.createCall(uid, 'internal', displayName);
 }
 
-//
 
