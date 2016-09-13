@@ -89,6 +89,7 @@ var toggleCallStatus = function(status){
 var APP_IDENTIFIER = "cwvojvsd6sge";
 var TOKEN;
 var AUTH_URL = 'ajax/authentification/';
+var CALL_URL = 'ajax/call/';
 
 // Details here: https://docs.sightcall.com/gd/references/javascript-sdk/Rtcc.html
 var options = {
@@ -195,13 +196,32 @@ initialize(currentUserUid, currentUserDisplayName);
  * https://docs.sightcall.com/GD/01_javascript/Tutorials/02_js_call.html
  */
 
+function recordCallEvent(call, type){
+
+  // Recording 3 types of events
+  // Call created: Patient calls
+  // Call started: Doctor accept calls
+  // Call terminated: Call is finished
+
+   $.ajax({
+                 type:"POST",
+                 url: CALL_URL,
+                 data: {
+                        'video': $('#test').val() // from form
+                        },
+                 success: function(){
+                     console.log("success")
+                 }
+            });
+}
+
 
 // Define the callbacks each time we have a new call
 function defineCallListeners(call) {
 
   if (call.getDirection() === "incoming") {
       toggleCallStatus('receive');
-      $('#callReceiveModal').modal('show');
+      //$('#callReceiveModal').modal('show');
       $('#caller_id').html(call.dn);
   }
 
@@ -212,6 +232,8 @@ function defineCallListeners(call) {
   })
 
   call.on('active', function() {
+    console.log("call has started");
+    //recordCallEvent(call,'created')
     toggleCallStatus('on');
   });
 
@@ -221,6 +243,9 @@ function defineCallListeners(call) {
   });
 
   call.on('terminate', function(reason) {
+
+    console.log("call has started");
+    //recordCallEvent(call,'terminated')
     if (reason === 'not allowed') {
       console.log("Call was not allowed");
       toggleCallStatus('ready');
@@ -228,10 +253,16 @@ function defineCallListeners(call) {
       toggleCallStatus('ready');
     }
   })
+
+  call.on('conference.participants', function(){
+    console.log(this);
+    //recordCallEvent(call,'started')
+  })
 }
 
 //when a call has started
 rtcc.on('call.create', defineCallListeners)
+
 
 //UI Bindings
 makeCall = function(uid, displayName){
