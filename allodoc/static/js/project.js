@@ -233,6 +233,7 @@ function defineCallListeners(call) {
 
   call.on('active', function() {
     console.log("call has started");
+    console.log("Event start info:" + this);
     //recordCallEvent(call,'created')
     toggleCallStatus('on');
   });
@@ -244,7 +245,8 @@ function defineCallListeners(call) {
 
   call.on('terminate', function(reason) {
 
-    console.log("call has started");
+    console.log("call has terminated");
+    console.log("Event terminated info:" + this);
     //recordCallEvent(call,'terminated')
     if (reason === 'not allowed') {
       console.log("Call was not allowed");
@@ -255,7 +257,8 @@ function defineCallListeners(call) {
   })
 
   call.on('conference.participants', function(){
-    console.log(this);
+    console.log("call has participants");
+    console.log("Event participants info:" + this);
     //recordCallEvent(call,'started')
   })
 }
