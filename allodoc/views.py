@@ -27,7 +27,7 @@ def get_security_token(request,uid):
             user = User.objects.get(username=uid)
             print user
             print settings.SIGHTCALL_API_KEY
-            #Ask again for a SightCall token ( limited lifetime )
+            #Ask again for a SightCall token ( limited validity lifetime for the token )
             user.request_video_security_token()
             response_data['token'] = user.video_security_token
             response_data['message'] = 'We found the user token'
