@@ -2,23 +2,64 @@
 {% load staticfiles %}
 
 {% block content %}
-    <div class="col-md-3">
 
-            <h2>{{ currentUserDisplayName }}</h2>
-            <div id="once_connected" style="display:none;">
-                <p> Connected to SightCall</p>
-            </div>
-            <div id="call">
-            </div>
-    </div>
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="card">
+              <div class="card-header">
+                {{ request.user.first_name }} {{ request.user.last_name }}
+              </div>
 
-    <div class="col-md-9">
+              <ul class="list-group list-group-flush">
+
+                <li id="call" class="list-group-item">
+                    <span id="call_receive" class="tag tag-primary tag-pill pull-xs-right" style="display:none;">RECEIVING</span>
+                    <span id="call_on" class="tag tag-success tag-pill pull-xs-right" style="display:none;">ACTIVE</span>
+                    <span id="call_ready" class="tag tag-info tag-pill pull-xs-right" style="display:none;">READY</span>
+                    <span id="call_not_ready" class="tag tag-warning tag-pill pull-xs-right" style="display:block;">NOT READY</span>
+                    Call Status
+                </li>
+                <li id="connection" class="list-group-item" >
+                    <span id="connection_connecting" class="tag tag-warning tag-pill pull-xs-right" style="display:block;">CONNECTING</span>
+                    <span id="connection_on" class="tag tag-success tag-pill pull-xs-right" style="display:none;">ON</span>
+                    <span id="connection_off" class="tag tag-danger tag-pill pull-xs-right" style="display:none;">OFF</span>
+                    Connection Status
+                </li>
+              </ul>
+            </div>
+        </div>
+        <div class="col-md-9">
         <h2>Here is a list of my consultations</h2>
+        </div>
     </div>
+
+    <div id="callReceiveModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+            <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h4 class="modal-title" id="exampleModalLabel">Receiving a call</h4>
+                </div>
+                <div class="modal-body">
+                  CALLER
+                  <div id="caller_id">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-success" >ACCEPT</button>
+                  <button type="button" class="btn btn-danger">REJECT</button>
+                </div>
+          </div>
+          </div>
+        </div>
+
+
 
 {% endblock content %}
 
-{{%  block page_javascript %}
+{%  block page_javascript %}
 
       <!-- Storing the current user in a variable to request the token -->
 
