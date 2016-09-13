@@ -43,7 +43,7 @@ class User(AbstractUser):
     #Will asynchronously request a token from rtcc cloud
     def request_video_security_token(self):
 
-        SightCallApiKey = 'cbd853379dea6a4225acd2671b8355409d4efe553e6db04d4eda0999642c'
+        SightCallApiKey = settings.DJANGO_SIGHTCALL_API_KEY
 
         headers = {
                     'Authorization': 'Apikey ' + SightCallApiKey,

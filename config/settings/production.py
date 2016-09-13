@@ -210,4 +210,5 @@ LOGGING = {
 ADMIN_URL = env('DJANGO_ADMIN_URL')
 
 
-# Your production stuff: Below this line define 3rd party library settings
+# SigthCall API key - only used in prod
+SIGHTCALL_API_KEY = env('SIGHTCALL_API_KEY')
