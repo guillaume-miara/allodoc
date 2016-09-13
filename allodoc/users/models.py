@@ -46,6 +46,7 @@ class User(AbstractUser):
     def request_video_security_token(self):
 
         SightCallApiKey = settings.DJANGO_SIGHTCALL_API_KEY
+        print SightCallApiKey
 
         headers = {
                     'Authorization': 'Apikey ' + SightCallApiKey,
@@ -62,6 +63,7 @@ class User(AbstractUser):
         try:
             response = requests.post(url,data=data,headers=headers)
             payload = response.json()
+            print payload
             response.raise_for_status()
             self.video_security_token = payload['data']
         except requests.exceptions.Timeout:

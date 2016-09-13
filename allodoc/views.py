@@ -20,7 +20,6 @@ def doctors(request):
 
 def get_security_token(request,uid):
 
-    print uid
     if request.is_ajax():
         response_data = {}
         try:
