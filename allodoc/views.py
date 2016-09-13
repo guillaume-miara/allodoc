@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.http import JsonResponse
@@ -24,6 +25,8 @@ def get_security_token(request,uid):
         response_data = {}
         try:
             user = User.objects.get(username=uid)
+            print user
+            print settings.SIGHTCALL_API_KEY
             #Ask again for a SightCall token ( limited lifetime )
             user.request_video_security_token()
             response_data['token'] = user.video_security_token
