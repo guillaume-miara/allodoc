@@ -34,26 +34,32 @@
     </div>
 
     <div id="callReceiveModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-sm">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
-            <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                  <h4 class="modal-title" id="exampleModalLabel">Receiving a call</h4>
+                <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                      <h4 class="modal-title" id="exampleModalLabel">You are receiving a new call</h4>
                 </div>
-                <div class="modal-body">
-                  CALLER
-                  <div id="caller_id">
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-success" >ACCEPT</button>
-                  <button type="button" class="btn btn-danger">REJECT</button>
-                </div>
-          </div>
-          </div>
+                    <div class="modal-body">
+                      CALL
+                        <div id="caller_id">
+                        </div>
+                        <div id="new_session">
+                        </div>
+                        <div id="new_publisher_token">
+                        </div>
+                        <div id="new_subscriber_token">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-success" id="accept-call" onclick="takeCall()">ACCEPT</button>
+                      <button type="button" class="btn btn-danger" id="reject-call'" data-dismiss="modal">REJECT</button>
+                    </div>
+              </div>
         </div>
+    </div>
 
 
 

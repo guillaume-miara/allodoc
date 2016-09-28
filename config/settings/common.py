@@ -45,7 +45,8 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     # custom users app
     'allodoc.users.apps.UsersConfig',
-    # Your stuff: custom apps go here
+    # Your stuff: custom apps go here,
+    'allodoc',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -237,4 +238,11 @@ AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 ADMIN_URL = r'^admin/'
 
 
-# Your common stuff: Below this line define 3rd party library settings
+#OpenTok settings
+OPENTOK_API_KEY = env('OPENTOK_API_KEY', default='45688762')
+OPENTOK_API_SECRET = env('OPENTOK_API_SECRET', default='dc00eb065c1ec556f0d06a0b6d9b6a7ff405f89c')
+
+#PubNub settings
+
+PUBNUB_PUBLISH_KEY = env('PUBNUB_PUBLISH_KEY', default='pub-c-149e1c89-02b4-462f-99bc-200e9ae052ec')
+PUBNUB_SUBSCRIBE_KEY = env('PUBNUB_SUBSCRIBE_KEY', default='sub-c-39adec0e-0f18-11e6-a6dc-02ee2ddab7fe')
