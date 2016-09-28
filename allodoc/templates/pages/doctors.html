@@ -49,7 +49,7 @@
                         <tr>
                           <td>{{ user.first_name  }}</td>
                           <td>{{ user.last_name}}</td>
-                          <td><button class="btn btn-primary call-button" onclick="makeCall('{{ user.username }}', '{{ user.first_name }} {{ user.last_name }}')">Call Doctor</button></td>
+                          <td><button class="btn btn-primary call-button" onclick="makeCall(currentUserUid,'{{ user.username }}')">Call Doctor</button></td>
                           <td>Pending</td>
                           <td>NA</td>
                         </tr>
@@ -62,7 +62,14 @@
         </div>
     </div>
 
+    <div class="callbox">
+        <div class="local-video" id="local-video">
 
+        </div>
+        <div class="remote-video" id="remote-video">
+
+        </div>
+    </div>
 
 {% endblock content %}
 

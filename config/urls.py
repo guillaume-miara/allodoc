@@ -21,8 +21,8 @@ urlpatterns = [
     url(r'^users/', include('allodoc.users.urls', namespace='users')),
     url(r'^accounts/', include('allauth.urls')),
 
-    #Security token ajax request from doctors page
-    url(r'ajax/authentification/(?P<uid>.*)', views.get_security_token, name='get_security_token'),
+    #Call
+    url(r'^doctors/ajax/call/(?P<caller>.*)/(?P<callee>.*)/$', views.call, name='call'),
 
     url(r'^doctors/$', views.doctors, name='doctors'),
     url(r'^consultations/$', TemplateView.as_view(template_name='pages/consultations.html'), name='consultations'),

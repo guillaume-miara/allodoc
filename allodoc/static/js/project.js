@@ -21,8 +21,31 @@ Issues with the above approach:
 $('.form-group').removeClass('row');
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////ALLODOC CONTROLLER SCRIPT////////////////////////////////////////////////
+//////////////////////////////////////////////ALLODOC CONTROLLER SCRIPT - TOKBOX///////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////
+// VARIABLES///////////////////////
+//////////////////////////////////////////
+
+var apiKey = '45688762';
+var session;
+var connectionCount = 0;
+var publisher;
+var localStreamElement = 'local-video';
+var remoteStreamElement = 'remote-video';
+var publisherProperties = {insertMode: "replace",
+                           usePreviousDeviceSelection: true,
+                           resolution: '1280x720'};
+var streamReceiverProperties = {insertMode: "replace"
+                           };
+
+var CALL_URL = 'ajax/call/';
+
+//Each user should only be connected to one session at a time
+var session_id;
+var publisher_token;
+var subscriber_token;
 
 //////////////////////////////////////////
 // UI HELPERS/////////////////////////////
@@ -47,7 +70,7 @@ var toggleConnectionStatus = function(status){
       break;
 
   }
-}
+};
 
 var toggleCallStatus = function(status){
   switch(status){
@@ -78,167 +101,218 @@ var toggleCallStatus = function(status){
 
   }
 
-}
-
-//////////////////////////////////////////
-// INITIALIZATION OF THE SIGHTCALL SDK////
-//////////////////////////////////////////
-
-// Based on the tutorial found here: https://github.com/sightcall/JS-Tutorials/blob/master/call/call.js
-
-var APP_IDENTIFIER = "cwvojvsd6sge";
-var TOKEN;
-var AUTH_URL = 'ajax/authentification/';
-var CALL_URL = 'ajax/call/';
-
-// Details here: https://docs.sightcall.com/gd/references/javascript-sdk/Rtcc.html
-var options = {
-    debugLevel : 3
-    //Not adding the container, so expecting to get the video in a draggable box.
-    };
-
-/**
- * AUTHENTICATION
- *
- * In this part, we manage the authentication process. First we create an instance of the
- * API, then we define the callbacks related to the authentication events.
- *
- * Detailed tutorial available here:
- * https://docs.sightcall.com/GD/01_javascript/Tutorials/01_js_authentication.html
- */
-
-//Creates the rtcc object with the given options
-var rtcc = new Rtcc(APP_IDENTIFIER, undefined, 'internal', options);
-var storedDisplayName = '';
-
-//Creates the rtcc object and define the callbacks to the events of the API
-var bindAuthCallbacks = function(rtcc, user_id) {
-  //log each event
-  rtcc.onAll(function() {
-    if (window.console) {
-      console.log('Rtcc: event "' + this.eventName + '"" with arguments: ' + JSON.stringify(arguments));
-    }
-  })
-
-  //what to do when we are ready to make calls
-
-  rtcc.on('cloud.sip.ok', function() {
-    console.log("cloud sip ok");
-    toggleConnectionStatus('on');
-    toggleCallStatus('ready');
-    rtcc.setDisplayName(storedDisplayName)
-  })
-
-  //what to do when we are connected when we are connected with another user id
-  //in plugin or driver mode
-  rtcc.on('cloud.loggedasotheruser', function() {
-    // force connection, kick other logged users
-    getToken(user_id, function(token) {
-      rtcc.forceAuthenticate();
-    });
-  })
-
-
-  //what do to when we are disconnected from the client: we reconnect
-  rtcc.on('cloud.authenticate.error', function(number) {
-    if (number === 15 || number === 29) {
-      console.log("Reconnecting");
-      getToken(user_id, rtcc.setToken);
-    }
-  });
 };
 
 
-//this will get an authentification token from your backend
-function getToken(uid, callback) {
-  $.ajax(AUTH_URL + uid, {
+//////////////////////////////////////////
+// UI CONTROLLER//////////////////////////
+//////////////////////////////////////////
+
+var initiate_call = function(caller, callee, callback){
+
+    //Make AJAX call to get a session id and token
+    $.ajax(CALL_URL + caller + '/' + callee, {
       dataType: 'json'
     })
     .done(function(response) {
-      var token = response.token;
-      if (!token) {
-        console.log("Error : no token")
+
+      //Set OpenTok Global variables for the call
+      session_id = response.session_id;
+      publisher_token = response.publisher_token;
+      subscriber_token = response.subscriber_token;
+
+      if (!publisher_token || !session_id || !subscriber_token) {
+        console.log("Error in the Ajax response");
       } else {
-        console.log(token);
-        callback(token);
+        console.log("Succesfully received the server's response to make a call");
+        callback(session_id);
       }
     })
-    .fail(console.log("getToken failing"))
-}
+    .fail(console.log("makeCall failing"))
+};
 
-//start by getting a token, then initialize the rtcc object.
-function initialize(userId, displayName) {
-  bindAuthCallbacks(rtcc, userId);
-  storedDisplayName = displayName;
-  getToken(userId, function(token) {
-    rtcc.setToken(token);
-    rtcc.initialize();
-    console.log(rtcc);
-  });
-}
+//Helper
+var onStreamReceiveError = function (error) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Subscriber added.');
+      }
+};
 
-//we connect with a UID and a display name.
-initialize(currentUserUid, currentUserDisplayName);
+// Defines the connection to the session and event handlers
+function connect() {
 
+  // Session initialization
+  session = OT.initSession(apiKey, session_id);
 
-/////////////
-// CALLS////
-/////////////
-
-
-/**
- * Call
- *
- * In this part, we manage the creation and the reception of a  call. We use the rtcc.createCall function,
- * and we define the callbacks for changing the UI on various call events.
- *
- * Detailed tutorial available here:
- * https://docs.sightcall.com/GD/01_javascript/Tutorials/02_js_call.html
- */
-
-
-// Define the callbacks each time we have a new call
-function defineCallListeners(call) {
-
-  if (call.getDirection() === "incoming") {
-      toggleCallStatus('receive');
-      //$('#callReceiveModal').modal('show');
-  }
-
-  call.onAll(function() {
-    if (window.console) {
-      console.log('Call: event "' + this.eventName + '"" with arguments: ' + JSON.stringify(arguments));
+  //Definition of event handlers to manage the connection
+  session.on({
+    connectionCreated: function (event) {
+      toggleConnectionStatus('on');
+      connectionCount++;
+      console.log(connectionCount + ' connections.');
+      publishStream();
+      toggleCallStatus('on');
+    },
+    connectionDestroyed: function (event) {
+      toggleConnectionStatus('off');
+      connectionCount--;
+      console.log(connectionCount + ' connections.');
+    },
+    sessionDisconnected: function sessionDisconnectHandler(event) {
+      // The event is defined by the SessionDisconnectEvent class
+      console.log('Disconnected from the session.');
+      toggleConnectionStatus('off');
+      //document.getElementById('disconnectBtn').style.display = 'none';
+      if (event.reason == 'networkDisconnected') {
+        alert('Your network connection terminated.')
+      }
     }
-  })
-
-  call.on('active', function() {
-    toggleCallStatus('on');
   });
 
-  // for webrtc screen share
-  call.on('chrome.screenshare.missing', function(url) {
-    window.open(url);
+  //Definition of the event handlers to manage the streams
+  session.on("streamCreated", function (event) {
+   //When a doctor joins the session, the patient
+   console.log("New stream in the session: " + event.stream.streamId);
+   session.subscribe(event.stream,
+                     remoteStreamElement,
+                     streamReceiverProperties,
+                     onStreamReceiveError)
   });
 
-  call.on('terminate', function(reason) {
 
-    if (reason === 'not allowed') {
-      console.log("Call was not allowed");
-      toggleCallStatus('ready');
+  session.on("streamDestroyed", function (event) {
+     console.log("Stream stopped. Reason: " + event.reason);
+  });
+
+  //Connect to the session
+  session.connect(publisher_token, function(error) {
+    if (error) {
+      console.log('Unable to connect: ', error.message);
     } else {
-      toggleCallStatus('ready');
+      //document.getElementById('disconnectBtn').style.display = 'block';
+      console.log('Connected to the session.');
+      connectionCount = 1;
     }
-  })
+  });
 
 }
 
-//when a call has started
-rtcc.on('call.create', defineCallListeners);
+// Publish the stream to the session
+function publishStream(){
+
+    publisher = OT.initPublisher(localStreamElement, publisherProperties, function(error) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Publisher initialized.');
+      }
+    });
+
+    publisher.on({
+      accessAllowed: function (event) {
+        // The user has granted access to the camera and mic.
+        console.log("Access has been granted");
+      },
+      accessDenied: function accessDeniedHandler(event) {
+        // The user has denied access to the camera and mic.
+        console.log("Access isn't granted");
+      }
+    });
+
+    publisher.on('streamCreated', function (event) {
+        console.log('The publisher started streaming.');
+    });
+
+    publisher.on("streamDestroyed", function (event) {
+      console.log("The publisher stopped streaming. Reason: "
+        + event.reason);
+    });
+
+    session.publish(publisher, function(error) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Publishing a stream.');
+      }
+    });
+
+};
+
+//////////////////////////////////////////
+// UI CONTROLLER - PATIENTS///////////////
+//////////////////////////////////////////
+
+var makeCall = function(caller, callee){
+
+    //Initiate the call
+    initiate_call(caller,callee, connect);
+
+};
 
 
-//UI Bindings
-makeCall = function(uid, displayName){
-    rtcc.createCall(uid, 'internal', displayName);
-}
+//////////////////////////////////////////
+// UI CONTROLLER - DOCTORS////////////////
+//////////////////////////////////////////
+
+// Initialize the pubnub instance
+
+var pubnub = PUBNUB.init({
+    publish_key: 'pub-c-149e1c89-02b4-462f-99bc-200e9ae052ec',
+    subscribe_key: 'sub-c-39adec0e-0f18-11e6-a6dc-02ee2ddab7fe',
+    error: function (error) {
+        console.log('Error:', error);
+    }
+})
+
+
+// Connect to the pubnub channel for that user where incoming session will be published
+pubnub.subscribe({
+    channel : currentUserUid,
+    message : function(m){
+        console.log(m);
+        // When there is a new message, we prompt the user to accept or reject the call with a modal that takes all call
+        // information
+        // The doctor can then accept to take the call or reject the call ( nothing happens)
+        $('#callReceiveModal').modal('show');
+
+        var new_session_id = m['session'];
+        var new_subscriber_token = m['subscriber_token'];
+        var new_publisher_token = m['publisher_token'];
+        var new_caller = m['caller'];
+
+        $('#caller_id').append(new_caller);
+        $('#new_session').append(new_session_id);
+        $('#new_publisher_token').append(new_publisher_token);
+        $('#new_subscriber_token').append(new_subscriber_token);
+    },
+    error : function (error) {
+        // Handle error here
+        console.log(JSON.stringify(error));
+    }
+});
+
+
+function takeCall(){
+    // Destroy existing session
+
+    // Save the new session and tokens
+    session_id = $('#new_session').text().trim();
+    publisher_token = $('#new_publisher_token').text().trim();
+    subscriber_token = $('#new_subscriber_token').text().trim();
+
+    console.log(session_id);
+    console.log(publisher_token);
+    console.log(subscriber_token);
+
+    // connect to new session
+    connect();
+
+    //Hide the modal
+    $('#callReceiveModal').modal('hide');
+
+};
+
 
 

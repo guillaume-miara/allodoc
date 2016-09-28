@@ -12,6 +12,7 @@ from django.views.generic import DetailView, ListView, RedirectView, UpdateView,
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from allodoc.models import OpenTokSession
 from .users.models import User
 
 def doctors(request):
@@ -19,20 +20,26 @@ def doctors(request):
     context = {'doctors': Doctors}
     return render(request, 'pages/doctors.html', context)
 
-def get_security_token(request,uid):
+def call(request,caller,callee):
 
     if request.is_ajax():
         response_data = {}
         try:
-            user = User.objects.get(username=uid)
-            print user
-            print settings.SIGHTCALL_API_KEY
-            #Ask again for a SightCall token ( limited validity lifetime for the token )
-            user.request_video_security_token()
-            response_data['token'] = user.video_security_token
-            response_data['message'] = 'We found the user token'
+            #Make sure the users exists
+            caller = User.objects.get(username=caller)
+            callee = User.objects.get(username=callee)
+            print caller, callee
+
+            session = OpenTokSession.objects.create_session(caller.username, callee.username)
+
+            response_data['session_id'] = session.opentok_id
+            response_data['publisher_token'] = session.opentok_publisher_token
+            response_data['subscriber_token'] = session.opentok_subscriber_token
+            response_data['message'] = 'We created the session succesfully'
+
+            print "We answered the AJAX request successfully"
         except Exception as e :
-            print "User not found"
+            print "Error creating the session"
             response_data['message'] = e.message
 
         return JsonResponse(response_data)
